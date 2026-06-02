@@ -4,8 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import type React from 'react';
+import { useState } from 'react';
+import archiveData from './archive_manifest.json';
 
-export const App: React.FC = () => (
+export const App: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredArchive = archiveData.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  return (
     <div className="min-h-screen w-full bg-legal-dark text-slate-200 font-mono p-4 md:p-8">
       {/* Header / Hero */}
       <header className="max-w-6xl mx-auto border-b border-slate-700 pb-8 mb-12">
@@ -13,9 +22,14 @@ export const App: React.FC = () => (
           <h1 className="text-4xl font-bold text-legal-gold">
             ⚖️ CASE-MACHERET-1997-2026
           </h1>
-          <span className="bg-legal-green text-slate-900 px-3 py-1 rounded-full text-xs font-bold">
-            A©t0r CORE v13
-          </span>
+          <div className="flex gap-2">
+            <span className="bg-legal-green text-slate-900 px-3 py-1 rounded-full text-xs font-bold">
+              A©t0r CORE v13
+            </span>
+            <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
+              VERIFIED
+            </span>
+          </div>
         </div>
         <p className="text-xl text-slate-400 max-w-2xl">
           Transcendent Integrity – Universal Legal Architecture (TI-ULA).
@@ -27,50 +41,89 @@ export const App: React.FC = () => (
         {/* Evidence Section */}
         <section className="lg:col-span-2 space-y-8">
           <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
-            <h2 className="text-2xl font-semibold mb-4 text-legal-green underline">
-              Legal Evidence & Proof
+            <h2 className="text-2xl font-semibold mb-6 text-legal-green underline">
+              Legal Evidence Archive
             </h2>
-            <ul className="space-y-4">
-              <li className="flex flex-col">
-                <span className="text-sm text-slate-500">Mirror URL:</span>
-                <a
-                  href="https://arhiv1973b.github.io/apostille-mirror/jus-cogens-proof-macheret.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 transition-colors"
-                >
-                  jus-cogens-proof-macheret.html
-                </a>
-              </li>
-              <li className="flex flex-col">
-                <span className="text-sm text-slate-500">
-                  Cryptographic Seal:
-                </span>
-                <code className="text-xs break-all bg-slate-900 p-2 mt-1 rounded">
-                  eployed_57BF917347C0B4DC6D4ABD3F6B16405A3D97971ADF7E52FA55CFEA244C289BEA
-                </code>
-              </li>
-              <li className="flex flex-col">
-                <span className="text-sm text-slate-500">Secret Word:</span>
-                <span className="text-slate-300 italic">
-                  &quot;База Данных&quot;
-                </span>
-              </li>
-            </ul>
+
+            {/* Search Bar */}
+            <div className="mb-6">
+              <input
+                type="text"
+                placeholder="Search archive (e.g., Jus Cogens, Scanner)..."
+                className="w-full bg-slate-900 border border-slate-600 rounded px-4 py-2 text-sm focus:border-legal-gold outline-none transition-colors"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-700 text-slate-500">
+                    <th className="pb-2 pr-4">Artifact Name</th>
+                    <th className="pb-2 pr-4">Type</th>
+                    <th className="pb-2">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {filteredArchive.map((item, idx) => (
+                    <tr
+                      key={idx}
+                      className="hover:bg-slate-700/30 transition-colors"
+                    >
+                      <td className="py-3 pr-4 font-bold text-slate-300">
+                        {item.url ? (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-400 hover:underline"
+                          >
+                            {item.name}
+                          </a>
+                        ) : (
+                          item.name
+                        )}
+                      </td>
+                      <td className="py-3 pr-4 text-slate-500 uppercase text-xs tracking-tighter">
+                        {item.type || 'mirror'}
+                      </td>
+                      <td className="py-3">
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded border ${
+                            item.status === 'evidence'
+                              ? 'border-red-500/50 text-red-400'
+                              : item.status === 'legal'
+                                ? 'border-legal-green/50 text-legal-green'
+                                : 'border-slate-600 text-slate-400'
+                          }`}
+                        >
+                          {item.status?.toUpperCase()}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700">
             <h2 className="text-2xl font-semibold mb-4 text-legal-gold">
-              Project Status
+              Cryptographic Fixation
             </h2>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div className="p-4 bg-slate-900 rounded border border-slate-700">
-                <div className="text-sm text-slate-500">Repository Hash</div>
-                <div className="text-xs truncate">cfcecebe8...</div>
+                <div className="text-xs text-slate-500 mb-1">A©TOR_KEY</div>
+                <code className="text-[10px] break-all text-legal-green">
+                  &quot;# [⚖ A©tor Declaration]&quot;
+                </code>
               </div>
               <div className="p-4 bg-slate-900 rounded border border-slate-700">
-                <div className="text-sm text-slate-500">Build Version</div>
-                <div className="text-xs">0.45.0-nightly</div>
+                <div className="text-xs text-slate-500 mb-1">Deploy Seal</div>
+                <code className="text-[10px] break-all">
+                  eployed_57BF917347C0B4DC6D4ABD3F6B16405A3D97971ADF7E52FA55CFEA244C289BEA
+                </code>
               </div>
             </div>
           </div>
@@ -106,29 +159,33 @@ export const App: React.FC = () => (
                   SWIFT: <code>FTMDMD2X</code>
                 </p>
               </div>
-              <p className="text-xs text-slate-500 italic mt-4">
+              <p className="text-xs text-slate-500 italic mt-4 leading-relaxed">
                 Recipient: Maceret Alexei. All contributions support Case
-                Maceret 1997-2026.
+                Maceret 1997-2026 and Jus Cogens defense.
               </p>
             </div>
           </div>
 
-          <div className="p-6 border border-slate-700 rounded-lg opacity-50 text-xs">
-            <p className="mb-2">
-              A©TOR_KEY=&quot;# [⚖ A©tor Declaration]&quot;
-            </p>
-            <p>
-              Verification Hash:
-              d4ba478e946b8843c4078b632a6fd8454ae299fcb9ce5c34f99f7ededf57e433
-            </p>
+          <div className="p-6 border border-slate-700 rounded-lg bg-slate-800/20">
+            <h3 className="text-sm font-bold text-slate-400 mb-3 uppercase tracking-widest">
+              Secret Word Verification
+            </h3>
+            <div className="text-center p-4 border-2 border-dashed border-slate-700 rounded text-legal-green font-bold">
+              &quot;База Данных&quot;
+            </div>
           </div>
         </aside>
       </main>
 
-      <footer className="max-w-6xl mx-auto mt-20 border-t border-slate-800 pt-8 text-center text-slate-500 text-sm">
+      <footer className="max-w-6xl mx-auto mt-20 border-t border-slate-800 py-8 flex justify-between items-center text-slate-500 text-xs">
         <p>
           © 2026 Case Maceret 1997-2026. Transcendent Integrity Architecture.
         </p>
+        <div className="flex gap-4">
+          <span>SHA-256 Verified</span>
+          <span>Open Source</span>
+        </div>
       </footer>
     </div>
   );
+};

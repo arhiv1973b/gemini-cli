@@ -1,0 +1,35 @@
+[
+  { "name": "opencode-main", "type": "directory", "status": "secured" },
+  {
+    "name": "rclone-v1.73.3-windows-amd64",
+    "type": "directory",
+    "status": "tool"
+  },
+  {
+    "name": "Scanner_X_2025-11-01_040000_compressed",
+    "type": "archive",
+    "status": "evidence"
+  },
+  {
+    "name": "TI-ULA_UN_Submission_Article60",
+    "type": "directory",
+    "status": "legal"
+  },
+  {
+    "name": "Jus Cogens Proof Mirror",
+    "url": "https://arhiv1973b.github.io/apostille-mirror/jus-cogens-proof-macheret.html",
+    "status": "mirror"
+  },
+  {
+    "name": "A©t0r_ARCHIVE_MASTER_2026.json",
+    "type": "data",
+    "status": "master"
+  },
+  {
+    "name": "JUS COGENS = FACTUAL PROOF",
+    "type": "document",
+    "status": "verified"
+  },
+  { "name": "Case Maceret 1997-2026", "type": "case", "status": "active" },
+  { "name": "A©t0r CORE v13", "type": "system", "status": "deployed" }
+]
