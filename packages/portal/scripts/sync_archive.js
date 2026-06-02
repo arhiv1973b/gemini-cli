@@ -5,6 +5,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 
 const SOURCE_DIR = 'H:\\Загрузки';
 const MANIFEST_PATH = path.join(process.cwd(), 'src', 'archive_manifest.json');
@@ -28,8 +29,20 @@ const STATUS_MAP = {
   '.mp3': 'deployed',
 };
 
+function getHash(filePath) {
+  try {
+    if (fs.lstatSync(filePath).isDirectory()) return null;
+    const fileBuffer = fs.readFileSync(filePath);
+    const hashSum = crypto.createHash('sha256');
+    hashSum.update(fileBuffer);
+    return hashSum.digest('hex');
+  } catch {
+    return null;
+  }
+}
+
 function syncManifest() {
-  console.log(`🔍 Scanning: ${SOURCE_DIR}`);
+  console.log(`🔍 Scanning & Hashing: ${SOURCE_DIR}`);
 
   if (!fs.existsSync(SOURCE_DIR)) {
     console.error(`❌ Error: Source directory ${SOURCE_DIR} not found.`);
@@ -40,6 +53,7 @@ function syncManifest() {
   const files = fs.readdirSync(SOURCE_DIR);
 
   const newItems = files.map((file) => {
+    const filePath = path.join(SOURCE_DIR, file);
     const ext = path.extname(file).toLowerCase();
     const isSigned = file.toLowerCase().includes('.signed');
 
@@ -48,11 +62,11 @@ function syncManifest() {
       type: ext.replace('.', '') || 'directory',
       category: CATEGORY_MAP[ext] || 'Archive',
       status: isSigned ? 'verified' : STATUS_MAP[ext] || 'secured',
-      timestamp: fs.statSync(path.join(SOURCE_DIR, file)).mtime.toISOString(),
+      timestamp: fs.statSync(filePath).mtime.toISOString(),
+      hash: getHash(filePath),
     };
   });
 
-  // Merge with static entries (like URLs) and prevent duplicates by name
   const staticEntries = existingManifest.filter(
     (item) => item.url || item.type === 'case' || item.type === 'system',
   );
@@ -63,7 +77,9 @@ function syncManifest() {
   );
 
   fs.writeFileSync(MANIFEST_PATH, JSON.stringify(uniqueItems, null, 2), 'utf8');
-  console.log(`✅ Manifest updated. Total items: ${uniqueItems.length}`);
+  console.log(
+    `✅ Manifest updated with SHA-256 hashes. Total items: ${uniqueItems.length}`,
+  );
 }
 
 syncManifest();

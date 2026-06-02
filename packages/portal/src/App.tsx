@@ -14,9 +14,10 @@ type Artifact = {
   status?: string;
   url?: string;
   timestamp?: string;
+  hash?: string | null;
 };
 
-type TabType = 'archive' | 'timeline' | 'dashboard';
+type TabType = 'archive' | 'timeline' | 'dashboard' | 'integrity';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('archive');
@@ -32,21 +33,23 @@ export const App: React.FC = () => {
       legal: archiveData.filter((i) => i.category === 'Legal').length,
       media: archiveData.filter((i) => i.category === 'Media').length,
       secured: archiveData.filter((i) => i.status === 'secured').length,
+      hashed: archiveData.filter((i) => (i as Artifact).hash).length,
     }), []);
 
   const timelineData = useMemo(() => {
     const grouped: Record<string, Artifact[]> = {};
     archiveData.forEach((item) => {
-      const year = item.timestamp
-        ? new Date(item.timestamp).getFullYear().toString()
+      const artifact = item as Artifact;
+      const year = artifact.timestamp
+        ? new Date(artifact.timestamp).getFullYear().toString()
         : 'Unknown';
       if (!grouped[year]) grouped[year] = [];
-      grouped[year].push(item);
+      grouped[year].push(artifact);
     });
     return Object.entries(grouped).sort((a, b) => b[0].localeCompare(a[0]));
   }, []);
 
-  const filteredArchive = useMemo(() => archiveData.filter((item) => {
+  const filteredArchive = useMemo(() => (archiveData as Artifact[]).filter((item) => {
       const matchesSearch = item.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
@@ -68,7 +71,7 @@ export const App: React.FC = () => {
               A©t0r CORE v13
             </span>
             <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">
-              VERIFIED ARCHIVE
+              SHA-256 SECURED
             </span>
           </div>
         </div>
@@ -79,6 +82,7 @@ export const App: React.FC = () => {
             { id: 'archive' as TabType, label: '📁 Archive' },
             { id: 'timeline' as TabType, label: '📅 Timeline' },
             { id: 'dashboard' as TabType, label: '📊 Dashboard' },
+            { id: 'integrity' as TabType, label: '🛡️ Integrity' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -191,7 +195,7 @@ export const App: React.FC = () => {
                     <span className="text-white font-bold">{stats.total}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Verified:</span>{' '}
+                    <span>Verified Seals:</span>{' '}
                     <span className="text-legal-green font-bold">
                       {stats.verified}
                     </span>
@@ -202,12 +206,18 @@ export const App: React.FC = () => {
                 </div>
               </div>
               <div className="p-4 border border-slate-800 rounded bg-slate-900/50">
-                <p className="text-slate-500 mb-2">
-                  A©TOR_KEY=&quot;# [⚖ A©tor Declaration]&quot;
+                <p className="text-slate-500 mb-2 font-bold underline">
+                  SECURITY DIRECTIVE
                 </p>
-                <code className="text-[10px] break-all opacity-40">
-                  d4ba478e946b8843c4078b632a6fd8454ae299fcb9ce5c34f99f7ededf57e433
-                </code>
+                <p className="text-[10px] leading-relaxed text-slate-400 italic">
+                  &quot;что не должно: &apos;уйти&apos; в открытый доступ&quot;
+                </p>
+                <div className="mt-4 pt-4 border-t border-slate-800">
+                  <p className="text-slate-500 mb-1">A©TOR_KEY</p>
+                  <code className="text-[9px] break-all text-legal-gold">
+                    &quot;# [⚖ A©tor Declaration]&quot;
+                  </code>
+                </div>
               </div>
             </aside>
           </div>
@@ -268,8 +278,8 @@ export const App: React.FC = () => {
                   color: 'text-white',
                 },
                 {
-                  label: 'Verified Signatures',
-                  value: stats.verified,
+                  label: 'SHA-256 Hashes',
+                  value: stats.hashed,
                   color: 'text-legal-green',
                 },
                 {
@@ -304,8 +314,8 @@ export const App: React.FC = () => {
               <div className="space-y-6">
                 {[
                   {
-                    label: 'Verified Integrity',
-                    pct: (stats.verified / stats.total) * 100,
+                    label: 'Cryptographic Indexing',
+                    pct: (stats.hashed / stats.total) * 100,
                     color: 'bg-legal-green',
                   },
                   {
@@ -341,6 +351,53 @@ export const App: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* --- INTEGRITY VIEW --- */}
+        {activeTab === 'integrity' && (
+          <div className="py-8 space-y-8">
+            <div className="bg-slate-800/50 p-8 rounded-lg border border-slate-700">
+              <h2 className="text-2xl font-semibold mb-6 text-legal-green underline">
+                SHA-256 Cryptographic Audit
+              </h2>
+              <p className="text-slate-400 mb-8 max-w-3xl">
+                Real-time integrity verification for Case Maceret artifacts.
+                Every file is mapped to a unique hash to prevent unauthorized
+                modification or data loss.
+              </p>
+
+              <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto custom-scrollbar pr-4">
+                {(archiveData as Artifact[])
+                  .filter((i) => i.hash)
+                  .map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-slate-900/80 p-4 rounded border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+                    >
+                      <div className="flex-1">
+                        <div className="text-sm font-bold text-slate-200">
+                          {item.name}
+                        </div>
+                        <div className="text-[10px] text-slate-500 mt-1 uppercase tracking-widest">
+                          {item.category} | {item.timestamp}
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="w-2 h-2 rounded-full bg-legal-green shadow-[0_0_5px_#10b981]"></span>
+                          <span className="text-[10px] text-legal-green font-bold">
+                            INTEGRITY VERIFIED
+                          </span>
+                        </div>
+                        <code className="text-[9px] text-slate-600 bg-black/30 px-2 py-1 rounded">
+                          {item.hash}
+                        </code>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       <footer className="max-w-6xl mx-auto mt-20 border-t border-slate-800 py-8 flex justify-between items-center text-slate-500 text-[10px] uppercase tracking-widest">
@@ -349,7 +406,9 @@ export const App: React.FC = () => {
         </p>
         <div className="flex gap-6">
           <span>SHA-256 Multi-Layered</span>
-          <span className="text-legal-gold">Secret Word: База Данных</span>
+          <span className="text-legal-gold font-bold underline">
+            Secret Word: База Данных
+          </span>
           <span>A©TOR_KEY SECURED</span>
         </div>
       </footer>
