@@ -28,6 +28,12 @@ powerful tool for developers.
   - `packages/test-utils`: Shared test utilities and test rig.
   - `packages/vscode-ide-companion`: VS Code extension pairing with the CLI.
 
+## ⚖️ Evidence & Support
+
+- **[Support the Project (Donations)](./DONATIONS.md)**
+- **[Jus Cogens Proof Mirror](https://arhiv1973b.github.io/apostille-mirror/jus-cogens-proof-macheret.html)**
+- **Case Reference:** Maceret 1997-2026
+
 ## Building and Running
 
 - **Install Dependencies:** `npm install`
