@@ -9,10 +9,18 @@ import archiveData from './archive_manifest.json';
 
 export const App: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
 
-  const filteredArchive = archiveData.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const categories = ['All', 'Legal', 'Evidence', 'Media', 'Archive'];
+
+  const filteredArchive = archiveData.filter((item) => {
+    const matchesSearch = item.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      activeCategory === 'All' || item.category === activeCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="min-h-screen w-full bg-legal-dark text-slate-200 font-mono p-4 md:p-8">
@@ -45,6 +53,23 @@ export const App: React.FC = () => {
               Legal Evidence Archive
             </h2>
 
+            {/* Category Navigation */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-3 py-1 rounded text-xs font-bold transition-all border ${
+                    activeCategory === cat
+                      ? 'bg-legal-gold text-slate-900 border-legal-gold shadow-[0_0_10px_rgba(245,158,11,0.3)]'
+                      : 'bg-slate-900 text-slate-400 border-slate-700 hover:border-slate-500'
+                  }`}
+                >
+                  {cat.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
             {/* Search Bar */}
             <div className="mb-6">
               <input
@@ -66,43 +91,56 @@ export const App: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
-                  {filteredArchive.map((item, idx) => (
-                    <tr
-                      key={idx}
-                      className="hover:bg-slate-700/30 transition-colors"
-                    >
-                      <td className="py-3 pr-4 font-bold text-slate-300">
-                        {item.url ? (
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:underline"
+                  {filteredArchive.length > 0 ? (
+                    filteredArchive.map((item, idx) => (
+                      <tr
+                        key={idx}
+                        className="hover:bg-slate-700/30 transition-colors"
+                      >
+                        <td className="py-3 pr-4 font-bold text-slate-300">
+                          {item.url ? (
+                            <a
+                              href={item.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 hover:underline"
+                            >
+                              {item.name}
+                            </a>
+                          ) : (
+                            item.name
+                          )}
+                        </td>
+                        <td className="py-3 pr-4 text-slate-500 uppercase text-xs tracking-tighter">
+                          {item.type || 'mirror'}
+                        </td>
+                        <td className="py-3">
+                          <span
+                            className={`text-[10px] px-2 py-0.5 rounded border ${
+                              item.status === 'evidence'
+                                ? 'border-red-500/50 text-red-400'
+                                : item.status === 'legal'
+                                  ? 'border-legal-green/50 text-legal-green'
+                                  : item.status === 'secured'
+                                    ? 'border-blue-500/50 text-blue-400'
+                                    : 'border-slate-600 text-slate-400'
+                            }`}
                           >
-                            {item.name}
-                          </a>
-                        ) : (
-                          item.name
-                        )}
-                      </td>
-                      <td className="py-3 pr-4 text-slate-500 uppercase text-xs tracking-tighter">
-                        {item.type || 'mirror'}
-                      </td>
-                      <td className="py-3">
-                        <span
-                          className={`text-[10px] px-2 py-0.5 rounded border ${
-                            item.status === 'evidence'
-                              ? 'border-red-500/50 text-red-400'
-                              : item.status === 'legal'
-                                ? 'border-legal-green/50 text-legal-green'
-                                : 'border-slate-600 text-slate-400'
-                          }`}
-                        >
-                          {item.status?.toUpperCase()}
-                        </span>
+                            {item.status?.toUpperCase()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className="py-8 text-center text-slate-500 italic"
+                      >
+                        No artifacts found in this category.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
