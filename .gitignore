@@ -55,6 +55,23 @@ packages/cli/download-ripgrep*/
 # GHA credentials
 gha-creds-*.json
 
+# SECRETS & SENSITIVE DATA (User Directive)
+*.pem
+*.key
+*.p12
+*.pfx
+*.signed.pdf
+*.signed
+secrets/
+credentials/
+sk-proj-*
+*.eml
+*.mp4
+*.heic
+*.jpeg
+*.jpg
+*.png
+
 # Log files
 patch_output.log
 gemini-debug.log
